@@ -1,0 +1,18 @@
+<script>
+  const obj = {
+    lastName: "张",
+    firstName: "三",
+    // 通过 get 标识符标记，可以让方法的调用像属性的调用一样
+    get fullName() {
+      return this.lastName + this.firstName;
+    },
+  };
+  const proxyObj = new Proxy(obj, {
+    get(target, key, receiver) {
+      console.log("getter触发了");
+      return Reflect.get(target, key, receiver);
+    },
+  });
+
+  console.log(proxyObj.fullName);
+</script>

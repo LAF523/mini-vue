@@ -1,0 +1,40 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>Page Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+  </head>
+  <body>
+    <div class="prices"></div>
+    <button class="btn">点击修改价格</button>
+    <script>
+      const pricesEl = document.querySelector(".prices");
+      const btnEl = document.querySelector(".btn");
+      let prices = 1;
+      pricesEl.innerText = prices;
+
+      // btnEl.addEventListener("click", () => {
+      //   prices = 2;
+      //   pricesEl.innerText = prices;
+      // });
+
+      const dataObj = {};
+      Object.defineProperty(dataObj, "prices", {
+        get() {
+          return prices;
+        },
+        set(newVal) {
+          prices = newVal;
+          pricesEl.innerText = newVal;
+        },
+      });
+
+      btnEl.addEventListener("click", () => {
+        dataObj.prices = 2;
+        console.log(dataObj.prices);
+      });
+    </script>
+  </body>
+</html>
