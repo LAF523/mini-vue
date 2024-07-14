@@ -1,0 +1,41 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>Page Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="../../dist/vue.js"></script>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script>
+      // 测试ref处理复杂数据类型
+
+      const { ref, effect } = Myvue;
+      const obj = ref({ name: "响应式" });
+
+      effect(() => {
+        document.querySelector("#app").innerHTML = obj.value.name;
+      });
+
+      setTimeout(() => {
+        obj.value.name = "修改之后值";
+      }, 2000);
+
+      // 测试ref处理简单数据类型
+
+      // const { ref, effect } = Myvue;
+      // debugger;
+      // const obj = ref("哈哈哈");
+
+      // effect(() => {
+      //   document.querySelector("#app").innerHTML = obj.value;
+      // });
+
+      // setTimeout(() => {
+      //   obj.value = "嘿嘿";
+      // }, 2000);
+    </script>
+  </body>
+</html>

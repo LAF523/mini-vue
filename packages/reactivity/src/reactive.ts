@@ -1,3 +1,4 @@
+import { isObject } from "@vue/shared";
 import { mutableHandlers } from "./basehandlers";
 
 // 缓存target对应的proxyObj
@@ -22,4 +23,11 @@ function createReactiveObject(
   proxyMap.set(target, existingProxy);
 
   return existingProxy;
+}
+
+/**
+ * @message: 如果是object类型的数据,直接使用reactive创建响应式数据
+ */
+export function toReactive(value: any) {
+  return isObject(value) ? reactive(value) : value;
 }

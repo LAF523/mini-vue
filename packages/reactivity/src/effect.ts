@@ -5,7 +5,7 @@ import { createDep, Dep } from "./deps";
 type KeyToMap = Map<any, Set<ReactiveEffect>>;
 let targetMap = new WeakMap<any, KeyToMap>();
 // 存放当前收集到的ReactveEffect
-let activeEffect: ReactiveEffect | undefined;
+export let activeEffect: ReactiveEffect | undefined;
 
 /**
  * @message: 依赖收集,存储target每个属性对应的依赖
@@ -71,13 +71,22 @@ export class ReactiveEffect<T = any> {
 /**
  * @message: 添加依赖到dep中
  */
-function trackEffets(dep: Dep) {
+export function trackEffets(dep: Dep) {
   dep.add(activeEffect!);
 }
 
-function triggerEffects(dep: Dep) {
+/**
+ * @message: 触发所有的依赖
+ */
+export function triggerEffects(dep: Dep) {
   const effects = isArray(dep) ? dep : [...dep];
   for (const effect of effects) {
-    effect.fn();
+    triggerEffect(effect);
   }
+}
+/**
+ * @message: 触发指定依赖
+ */
+export function triggerEffect(effect: ReactiveEffect) {
+  effect.run();
 }
