@@ -9,19 +9,15 @@
   </head>
   <body>
     <div id="app"></div>
-    <div id="app1"></div>
     <script>
+      const { h } = Myvue;
 
-      const { reactive, effect } = Myvue;
-      const obj = reactive({ name: "响应式" });
-
-      effect(() => (document.querySelector("#app").innerHTML = obj.name));
-
-      effect(() => (document.querySelector("#app1").innerHTML = obj.name));
-
-      setTimeout(() => {
-        obj.name = "修改之后值";
-      }, 2000);
+      const vnode = h(
+        "div",
+        { class: ["red", "yellow", { black: true }] },
+        "这是红色的div"
+      );
+      console.log("vnode:", vnode);
     </script>
   </body>
 </html>

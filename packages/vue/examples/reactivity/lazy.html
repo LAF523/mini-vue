@@ -11,13 +11,14 @@
     <div id="app"></div>
     <div id="app1"></div>
     <script>
+      // 测试reactive函数打包导出是否成功,是否可用
 
       const { reactive, effect } = Myvue;
       const obj = reactive({ name: "响应式" });
 
-      effect(() => (document.querySelector("#app").innerHTML = obj.name));
-
-      effect(() => (document.querySelector("#app1").innerHTML = obj.name));
+      effect(() => (document.querySelector("#app1").innerHTML = obj.name), {
+        lazy: true, // 不进行依赖收集
+      });
 
       setTimeout(() => {
         obj.name = "修改之后值";

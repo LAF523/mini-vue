@@ -1,8 +1,14 @@
-import { isArray } from "@vue/shared";
+import { extend, isArray } from "@vue/shared";
 import { createDep, Dep } from "./deps";
+import { ComputedRefImpl } from "./computed";
 
-// 存放每个target和其对应的所有依赖
 type KeyToMap = Map<any, Set<ReactiveEffect>>;
+export type EffectScheduler = (...args: any[]) => any;
+export type ReactiveOptions = {
+  lazy?: boolean;
+  scheduler?: EffectScheduler;
+};
+// 存放每个target和其对应的所有依赖
 let targetMap = new WeakMap<any, KeyToMap>();
 // 存放当前收集到的ReactveEffect
 export let activeEffect: ReactiveEffect | undefined;
@@ -50,23 +56,35 @@ export function trigger(target: object, key: string | symbol, value: any) {
 /**
  * @message: 将依赖创建为依赖对象,并保存到全局变量activeEffect
  */
-export function effect<T = any>(fn: () => T) {
+export function effect<T = any>(fn: () => T, option: ReactiveOptions) {
   const _effect = new ReactiveEffect(fn);
-  _effect.run(); // 调用run 保存这个实例到activeEffect,并执行依赖
+  if (option) {
+    extend(_effect, option);
+  }
+  if (!option || !option.lazy) {
+    _effect.run(); // 调用run 保存这个实例到activeEffect,并执行依赖
+  }
 }
 
 // 包含依赖实例
 export class ReactiveEffect<T = any> {
   public fn: () => T;
-  constructor(fn: () => T) {
+  public computed?: ComputedRefImpl<T>;
+  public scheduler?: EffectScheduler | null = null; // 调度器,如果有调度器,触发依赖时会优先执行调度器
+  constructor(fn: () => T, scheduler?: EffectScheduler) {
     this.fn = fn; // 将依赖函数保存在fn中,这样每个实例都能保存对应的依赖,保存这个实例,就可以拿到依赖函数了
+    this.scheduler = scheduler; // 和计算属性相关
   }
 
   run() {
     activeEffect = this; // 指定当前处理的依赖,以便收集的时候获取
 
-    this.fn();
+    const res = this.fn();
+    activeEffect = undefined;
+    return res;
   }
+
+  stop() {}
 }
 /**
  * @message: 添加依赖到dep中
@@ -80,13 +98,24 @@ export function trackEffets(dep: Dep) {
  */
 export function triggerEffects(dep: Dep) {
   const effects = isArray(dep) ? dep : [...dep];
+  // for (const effect of effects) {
+  //   if (effect.computed) {
+  //     triggerEffect(effect);
+  //   }
+  // }
   for (const effect of effects) {
+    // if (!effect.computed) {
     triggerEffect(effect);
+    // }
   }
 }
 /**
  * @message: 触发指定依赖
  */
 export function triggerEffect(effect: ReactiveEffect) {
-  effect.run();
+  if (effect.scheduler) {
+    effect.scheduler();
+  } else {
+    effect.run();
+  }
 }

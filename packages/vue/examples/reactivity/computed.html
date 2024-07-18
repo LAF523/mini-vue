@@ -9,15 +9,18 @@
   </head>
   <body>
     <div id="app"></div>
-    <div id="app1"></div>
     <script>
-
-      const { reactive, effect } = Myvue;
+      const { reactive, effect, computed } = Myvue;
       const obj = reactive({ name: "响应式" });
+      debugger;
 
-      effect(() => (document.querySelector("#app").innerHTML = obj.name));
+      const computedData = computed(() => {
+        return `这是计算数据的返回的值: ${obj.name}`;
+      });
 
-      effect(() => (document.querySelector("#app1").innerHTML = obj.name));
+      effect(() => {
+        document.querySelector("#app").innerHTML = computedData.value;
+      });
 
       setTimeout(() => {
         obj.name = "修改之后值";

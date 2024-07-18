@@ -1,6 +1,9 @@
 import { isObject } from "@vue/shared";
 import { mutableHandlers } from "./basehandlers";
 
+export enum ReactiveFlags {
+  IS_REACTIVE = "__v_isReactive",
+}
 // 缓存target对应的proxyObj
 const reactiveMap: WeakMap<object, any> = new WeakMap();
 export function reactive(target: object) {
@@ -19,6 +22,7 @@ function createReactiveObject(
   }
 
   existingProxy = new Proxy(target, mutableHandlers);
+  existingProxy[ReactiveFlags.IS_REACTIVE] = true; // 表示reactive创建的数据
   // 构建target和proxy的映射
   proxyMap.set(target, existingProxy);
 

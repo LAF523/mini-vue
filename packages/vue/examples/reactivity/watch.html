@@ -11,16 +11,16 @@
     <div id="app"></div>
     <div id="app1"></div>
     <script>
-
-      const { reactive, effect } = Myvue;
+      const { reactive, effect, watch, ref } = Myvue;
       const obj = reactive({ name: "响应式" });
 
-      effect(() => (document.querySelector("#app").innerHTML = obj.name));
-
-      effect(() => (document.querySelector("#app1").innerHTML = obj.name));
+      watch(obj, (oldValue, newValue) => {
+        console.log("检测到值变化了,oldValue,newValue:", oldValue, newValue);
+      });
 
       setTimeout(() => {
-        obj.name = "修改之后值";
+        obj.name = "第一次修改";
+        console.log("修改完毕");
       }, 2000);
     </script>
   </body>
