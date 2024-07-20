@@ -1,0 +1,21 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>Page Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="../../dist/vue.js"></script>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script>
+      const container = document.querySelector("#app");
+      const { h, render, Comment } = Myvue;
+      debugger;
+
+      const vnode = h(Comment, "这是红色的div");
+      render(vnode, container);
+    </script>
+  </body>
+</html>

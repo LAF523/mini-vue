@@ -35,6 +35,7 @@ export const isString = (v: any): v is String => {
 export const isVnode = (v: any): v is Vnode => {
   return v && v.__V_isVnode === true;
 };
+// on开头后面不跟a-z
 const isOnRegx = /^on[^a-z]/;
 export const isOn = (key: string) => {
   return isOnRegx.test(key);
