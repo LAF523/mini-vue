@@ -12,7 +12,6 @@
     <script>
       const { reactive, effect, computed } = Myvue;
       const obj = reactive({ name: "响应式" });
-      debugger;
 
       const computedData = computed(() => {
         return `这是计算数据的返回的值: ${obj.name}`;

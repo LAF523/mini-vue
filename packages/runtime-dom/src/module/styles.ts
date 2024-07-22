@@ -4,7 +4,6 @@ import { EMPTY_OBJ, isArray, isObject, isString } from "@vue/shared";
  * @message: 处理样式
  */
 export const patchStyles = (el: Element, preValue: any, nextValue: any) => {
-  debugger;
   const style = (el as HTMLElement).style;
   if (nextValue && !isString(nextValue)) {
     // 删除旧的

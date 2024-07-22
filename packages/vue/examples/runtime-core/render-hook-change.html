@@ -1,0 +1,36 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>Page Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="../../dist/vue.js"></script>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script>
+      // 无状态组件测试用例
+      const container = document.querySelector("#app");
+      const { h, render } = Myvue;
+      const Component = {
+        data() {
+          return {
+            msg: "消息",
+          };
+        },
+        render() {
+          return h("div", { class: "active" }, this.msg);
+        },
+        mounted() {
+          setTimeout(() => {
+            this.msg = "修改";
+          }, 2000);
+        },
+      };
+
+      const componentVnode = h(Component);
+      render(componentVnode, container);
+    </script>
+  </body>
+</html>

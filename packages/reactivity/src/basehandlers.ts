@@ -11,7 +11,6 @@ export const mutableHandlers: ProxyHandler<object> = {
 function createGetter() {
   return function (target: object, key: string | symbol, receiver: object) {
     const res = Reflect.get(target, key, receiver);
-
     // 依赖收集
     track(target, key);
 

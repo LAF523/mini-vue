@@ -3,7 +3,10 @@ import { Fragment, Vnode, Text, Comment, isSameType } from "./vnode";
 import { patchProps } from "packages/runtime-dom/src/patchProps";
 import { nodeOps } from "packages/runtime-dom/src/nodeOps";
 import { EMPTY_OBJ, extend } from "@vue/shared";
-import { normalizeVnode } from "./componentRenderUtils";
+import { normalizeVnode, renderComponentRoot } from "./componentRenderUtils";
+import { createComponentInstance, setupComponent } from "./components";
+import { ReactiveEffect } from "packages/reactivity/src/effect";
+import { queuePreFlushCb } from "./scheduler";
 
 // runtime-dom中封装的各种兼容API
 interface RenderOptions {
@@ -112,10 +115,28 @@ function createBaseRenderer(renderOptions: RenderOptions): {
           processElement(oldVnode, newVnode, container, anchor);
         } else if (shapeFlag & ShapeFlags.COMPONENT) {
           // 类型是组件
+          processComponent(oldVnode, newVnode, container, anchor);
         }
       }
     }
   };
+
+  /**
+   * @message: 处理组件类型vnode
+   */
+  function processComponent(
+    oldVnode: Vnode | null,
+    newVnode: Vnode,
+    container: Element,
+    anchor = null
+  ) {
+    if (oldVnode === null) {
+      // 挂载
+      mountComponent(newVnode, container, anchor);
+    } else {
+      // 更新
+    }
+  }
 
   /**
    * @message: 处理代码片段元素
@@ -319,6 +340,74 @@ function createBaseRenderer(renderOptions: RenderOptions): {
       const childVnode = normalizeVnode(item);
       patch(null, childVnode, container, anchor);
     }
+  }
+
+  /**
+   * @message: 挂载组件类型vnode
+   */
+  function mountComponent(newVnode: Vnode, container: Element, anchor = null) {
+    // createComponentInstance创建组件实例.保存在Vnode的component属性上
+    const instance = (newVnode.component = createComponentInstance(newVnode));
+    // setupComponent 标准化组件实例,添加render,处理数据
+    setupComponent(instance);
+    // setupRenderEffect 设置组件渲染
+    setupRenderEffect(instance, newVnode, container, anchor);
+  }
+
+  /**
+   * @message: 组件渲染
+   */
+  function setupRenderEffect(
+    instance,
+    newVnode: Vnode,
+    container: Element,
+    anchor = null
+  ) {
+    const componentUpDateFn = () => {
+      const { bm, m } = instance;
+      if (!instance.isMounted) {
+        // 执行onBeforeMounted
+        if (bm) {
+          bm();
+        }
+
+        // 生成组件vnode
+        instance.subtree = renderComponentRoot(instance);
+        // 渲染vnode
+        patch(null, instance.subtree, container, anchor);
+
+        // 声明周期onMounted
+        if (m) {
+          m();
+        }
+
+        newVnode.el = instance.subtree.el;
+        instance.isMounted = true;
+      } else {
+        // 生成新的vnode,然后patch
+        let { next, vnode } = instance;
+        if (!next) {
+          next = vnode;
+        }
+        // TODO 执行beforeUpdate hook
+
+        const nextTree = renderComponentRoot(instance);
+        const preTree = instance.subtree;
+        instance.subtree = nextTree;
+
+        patch(preTree, nextTree, container, anchor);
+        next.el = nextTree.el;
+
+        // TODO 执行updated hook
+      }
+    };
+
+    instance.effect = new ReactiveEffect(componentUpDateFn, () =>
+      queuePreFlushCb(instance.update)
+    );
+    instance.update = () => instance.effect.run();
+
+    instance.update();
   }
 
   return {

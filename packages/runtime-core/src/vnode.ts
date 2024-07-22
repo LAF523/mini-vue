@@ -9,6 +9,7 @@ export interface Vnode {
   shapeFlag: number;
   el: Element;
   key: any;
+  component?: any;
 }
 
 // 定义三种虚拟DOM类型
@@ -100,6 +101,9 @@ function normalizeClass(klass: any): String {
   return res.trim();
 }
 
+/**
+ * @message: 是否是相同类型的vnode
+ */
 export const isSameType = (v1: Vnode, v2: Vnode) => {
   return v1.type === v2.type && v1.key === v2.key;
 };

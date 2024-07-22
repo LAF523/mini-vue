@@ -6,7 +6,6 @@ export function patchEvent(
 ) {
   // 缓存优化
   let invokers = getCache(el);
-  console.log("invokers === el._vei:", invokers === el._vei);
 
   const existingInvoker = invokers[rawname];
   if (nextValue && existingInvoker) {

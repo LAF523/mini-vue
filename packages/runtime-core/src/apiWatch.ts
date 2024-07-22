@@ -29,7 +29,6 @@ function toWatch(
     getter = () => source;
     deep = true;
   } else if (isRef(source)) {
-    debugger;
     getter = () => source.value;
   } else {
     getter = () => ({});
