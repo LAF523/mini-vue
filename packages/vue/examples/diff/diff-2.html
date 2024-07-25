@@ -1,0 +1,35 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>Page Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="../../dist/vue.js"></script>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script>
+      // 处理新旧节点后面所有相同的节点
+      const container = document.querySelector("#app");
+      const { h, render } = Myvue;
+      const vnode1 = h("ul", [
+        h("li", { key: "4" }, "a"),
+        h("li", { key: "1" }, "b"),
+        h("li", { key: "2" }, "c"),
+      ]);
+      debugger;
+      render(vnode1, container);
+
+      // 更新触发diff
+      setTimeout(() => {
+        const vnode2 = h("ul", [
+          h("li", { key: "3" }, "a"),
+          h("li", { key: "1" }, "b"),
+          h("li", { key: "2" }, "d"),
+        ]);
+        render(vnode2, container);
+      }, 2000);
+    </script>
+  </body>
+</html>

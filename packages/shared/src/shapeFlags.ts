@@ -1,3 +1,6 @@
+/**
+ * @message: 标记vnode的类型
+ */
 export const enum ShapeFlags {
   // vnode类型
   ELEMENT = 1, // 普通标签

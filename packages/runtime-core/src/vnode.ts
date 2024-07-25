@@ -50,6 +50,7 @@ function createBaseVnode(
     props: props,
     children,
     shapeFlag,
+    key: props?.key || undefined,
   };
 
   normalizeChildren(vnode, children);

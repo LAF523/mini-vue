@@ -11,7 +11,7 @@ export const nodeOps = {
 /**
  * @message: 插入元素
  */
-function insert(el: Element, parent: Element, anchor: Node | null = null) {
+function insert(el: Element, parent: Element, anchor: Element | null = null) {
   parent.insertBefore(el, anchor);
 }
 /**
