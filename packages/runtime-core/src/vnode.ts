@@ -108,3 +108,8 @@ function normalizeClass(klass: any): String {
 export const isSameType = (v1: Vnode, v2: Vnode) => {
   return v1.type === v2.type && v1.key === v2.key;
 };
+
+// 创建注释类型vnode
+export function createCommentVnode(text) {
+  return createVnode(Comment, null, text);
+}

@@ -5,5 +5,6 @@ export {
   Comment,
   Fragment,
   createVnode as createElementVnode,
+  createCommentVnode,
 } from "./vnode";
-export { render } from "./renderer";
+export { render, createApp } from "./renderer";

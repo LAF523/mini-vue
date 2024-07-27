@@ -11,12 +11,11 @@ import { isText } from "../utils";
  * 在这里需要添加上'+'号
  */
 export function tansformText(node, context) {
-  const needProcess = [
-    NodeTypes.ROOT,
-    NodeTypes.ELEMENT,
-    NodeTypes.FOR,
-    NodeTypes.IF_BRANCH,
-  ].includes(node.type);
+  const needProcess =
+    node.type === NodeTypes.ROOT ||
+    node.type === NodeTypes.ELEMENT ||
+    node.type === NodeTypes.FOR ||
+    node.type === NodeTypes.IF_BRANCH;
 
   if (needProcess) {
     return () => {
@@ -24,16 +23,16 @@ export function tansformText(node, context) {
       let currContainer;
       for (let i = 0; i < children.length; i++) {
         const child = children[i];
-        if (isText(children)) {
+        if (isText(child)) {
           // 当前节点为text
           for (let j = i + 1; j < children.length; j++) {
             const next = children[j];
             if (isText(next)) {
-              // 如果下一个节点也是next
+              // 如果下一个节点也是text
 
               if (!currContainer) {
                 currContainer = children[i] = createCompoundExpression(
-                  [children],
+                  [child],
                   child.loc
                 );
               }

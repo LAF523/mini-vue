@@ -4,6 +4,8 @@ import { reactive } from "@vue/reactivity";
 import { onBeforeMount, onMount, onMounted } from "./apiLifecycle";
 let uid = 0;
 
+let compile: any; // 存放编译器
+
 export const enum LifecycleHooks {
   BEFORE_CREATE = "bc",
   CREATED = "c",
@@ -54,14 +56,22 @@ const setupStateFulComponent = (instance) => {
 
 const finishComponentSetup = (instance) => {
   const component = instance.type;
-
   if (!instance.render) {
+    if (compile && !component.render) {
+      if (component.template) {
+        // 说明组件没有提供render函数,需要将template转换成render
+        component.render = compile(component.template);
+      }
+    }
     // 如果没有render函数,说明不是setup语法,使用setup语法的情况下,上一步已经为render赋值了
     instance.render = component.render;
   }
 
   applyOptions(instance);
 };
+export function registerRuntimeCompiler(_compile) {
+  compile = _compile;
+}
 
 /**
  * @message: 处理组件的各个配置,数据,计算属性,侦听器,生命周期等等

@@ -6,6 +6,10 @@ export {
   Comment,
   Fragment,
   render,
+  createApp,
   createElementVnode,
+  createCommentVnode,
 } from "@vue/runtime-core";
 export { compile } from "@vue/vue-compat";
+
+export { toDisplayString } from "@vue/shared";

@@ -2,12 +2,12 @@ import { ShapeFlags } from "packages/shared/src/shapeFlags";
 import { Fragment, Vnode, Text, Comment, isSameType } from "./vnode";
 import { patchProps } from "packages/runtime-dom/src/patchProps";
 import { nodeOps } from "packages/runtime-dom/src/nodeOps";
-import { EMPTY_OBJ, extend } from "@vue/shared";
+import { EMPTY_OBJ, extend, isString } from "@vue/shared";
 import { normalizeVnode, renderComponentRoot } from "./componentRenderUtils";
 import { createComponentInstance, setupComponent } from "./components";
 import { ReactiveEffect } from "packages/reactivity/src/effect";
 import { queuePreFlushCb } from "./scheduler";
-import { patchKeyedChildren } from "./diff";
+import { createAppAPI } from "./createAppAPI";
 
 // runtime-dom中封装的各种兼容API
 interface RenderOptions {
@@ -36,13 +36,35 @@ let renderer;
 export const render = (...args) => {
   return ensureRenderer().render(...args);
 };
+export const createApp = (...args) => {
+  const app = ensureRenderer().createApp(...args);
 
-function ensureRenderer(): { render: Function } {
+  const { mount } = app;
+  //createAPP参数兼容: 选择器和element
+  app.mount = (elementOrSelector: Element | string) => {
+    const container = normalizeContainer(elementOrSelector);
+    if (!container) {
+      return;
+    }
+    mount(container);
+  };
+  return app;
+};
+
+function normalizeContainer(elementOrSelector: Element | string) {
+  if (isString(elementOrSelector)) {
+    return document.querySelector(elementOrSelector);
+  }
+  return elementOrSelector;
+}
+
+function ensureRenderer(): { render: Function; createApp: Function } {
   return renderer || (renderer = createBaseRenderer(renderOptions));
 }
 
 function createBaseRenderer(renderOptions: RenderOptions): {
   render: Function;
+  createApp: Function;
 } {
   // 获取runtime-dom中的api
   const {
@@ -587,6 +609,7 @@ function createBaseRenderer(renderOptions: RenderOptions): {
 
   return {
     render,
+    createApp: createAppAPI(render),
   };
 }
 

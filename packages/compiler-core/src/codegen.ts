@@ -4,6 +4,7 @@ import {
   CREATE_ELEMENT_VNODE,
   CREATE_VNODE,
   helperNameMap,
+  TO_DISPLAY_STRING,
 } from "./runtimehelpers";
 
 /**
@@ -31,8 +32,12 @@ export function generate(ast) {
   push(`function ${functionName}(${signature}) {`);
   indent();
 
+  // 拼接with
+  push("with (_ctx) {");
+  indent();
+
   // 定义变量
-  if (ast.helpers.length) {
+  if (ast.helpers.length > 0) {
     const str = ast.helpers
       .map((key) => {
         const fnName = helperNameMap[key];
@@ -52,6 +57,9 @@ export function generate(ast) {
   } else {
     push("null");
   }
+  // 闭合with
+  deindent();
+  push("}");
 
   deindent();
   push("}");
@@ -63,13 +71,104 @@ export function generate(ast) {
 
 function genNode(node, context) {
   switch (node.type) {
+    case NodeTypes.ELEMENT:
+    case NodeTypes.IF:
+      genNode(node.codegenNode, context);
+      break;
     case NodeTypes.VNODE_CALL:
       genVnodeCall(node, context);
       break;
     case NodeTypes.TEXT:
       genText(node, context);
       break;
+    case NodeTypes.SIMPLE_EXPRESSION:
+      genExpression(node, context);
+      break;
+    case NodeTypes.INTERPOLATION: //
+      genInterpolation(node, context);
+      break;
+    case NodeTypes.COMPOUND_EXPRESSION: // 复合表达式
+      genCompoundExpression(node, context);
+      break;
+    // js调用表达式
+    case NodeTypes.JS_CALL_EXPRESSION:
+      genCallExpression(node, context);
+      break;
+    // js条件表达式
+    case NodeTypes.JS_CONDITIONAL_EXPRESSION:
+      genConditionalExpression(node, context);
+      break;
   }
+}
+// js条件表达式
+// isShow
+//        ? _createElementVnode("h1", null, ["你好，世界"])
+//        : _createCommentVnode("v-if", true),
+function genConditionalExpression(node, context) {
+  const { test, consequent, alternate, newline: needNewLine } = node;
+  const { push, indent, deindent, newline } = context;
+
+  if (test.type === NodeTypes.SIMPLE_EXPRESSION) {
+    genExpression(test, context); // 写入变量
+  }
+  needNewLine && indent();
+  context.indentLeve++;
+  needNewLine || push(` `);
+  push(`? `);
+  genNode(consequent, context);
+  context.indentLeve--;
+  needNewLine && newline();
+  needNewLine || push(` `);
+  push(`: `);
+
+  // 判断else的类型是否也是 JS_CONDITIONAL_EXPRESSION
+  const isNested = alternate.type === NodeTypes.JS_CONDITIONAL_EXPRESSION;
+  if (!isNested) {
+    context.indentLeve++;
+  }
+  genNode(alternate, context);
+  if (!isNested) {
+    context.indentLeve--;
+  }
+  needNewLine && deindent();
+}
+
+// js调用表达式
+function genCallExpression(node, context) {
+  const { push, helper } = context;
+  const callee = isString(node.callee) ? node.callee : helper(node.callee);
+  push(callee + "(", node);
+  genNodeList(node.arguments, context);
+  push(")");
+}
+
+function genCompoundExpression(node, context) {
+  for (let i = 0; i < node.children!.length; i++) {
+    const child = node.children![i];
+    if (isString(child)) {
+      context.push(child);
+    } else {
+      genNode(child, context);
+    }
+  }
+}
+
+/**
+ * 插值表达式,{{msg}} > _toDisplayString(msg)
+ */
+function genInterpolation(node, context) {
+  context.push(`${context.helper(TO_DISPLAY_STRING)}(`);
+  // 参数
+  genNode(node.content, context);
+  context.push(`)`);
+}
+
+/**
+ * 插值表达式中的内容
+ */
+function genExpression(node, context) {
+  const { isStatic, content } = node;
+  context.push(isStatic ? JSON.stringify(content) : content, node);
 }
 
 /**

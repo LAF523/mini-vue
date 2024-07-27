@@ -14,14 +14,14 @@ export function normalizeVnode(child: any) {
 }
 
 /**
- * @message: 生成组件实例的vnode
+ * @message: 执行render,获取组件返回的vnode
  */
 export function renderComponentRoot(instance) {
-  const { vnode, render, data } = instance;
+  const { vnode, render, data = {} } = instance;
   let result;
   try {
     if (vnode.shapeFlag & ShapeFlags.STATEFUL_COMPONENT) {
-      const componentRenderVnode = render.call(data);
+      const componentRenderVnode = render.call(data, data);
       result = normalizeVnode(componentRenderVnode);
     }
   } catch (e) {

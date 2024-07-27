@@ -40,3 +40,5 @@ const isOnRegx = /^on[^a-z]/;
 export const isOn = (key: string) => {
   return isOnRegx.test(key);
 };
+
+export * from "./toDisplayString";
